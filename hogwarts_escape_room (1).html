@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هوجوورتس - غرفة الهروب الفيزيائية</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel+Decorative:wght@400;700;900&family=UnifrakturMaguntia&family=Cinzel:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f0c040;
+    --dark-gold: #b8860b;
+    --deep-purple: #1a0a2e;
+    --mid-purple: #2d1b4e;
+    --light-purple: #4a2080;
+    --crimson: #8b0000;
+    --bright-red: #cc2200;
+    --parchment: #f5e6c8;
+    --dark-parchment: #e8d5a0;
+    --glow-green: #00ff88;
+    --dark-green: #003300;
+    --silver: #c0c0c0;
+    --smoke: rgba(255,255,255,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--deep-purple);
+    color: var(--parchment);
+    min-height: 100vh;
+    overflow-x: hidden;
+    direction: rtl;
+  }
+
+  /* ===== MAGIC BACKGROUND ===== */
+  #magic-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: radial-gradient(ellipse at 20% 20%, #2d0050 0%, #0a0020 40%, #000010 100%);
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%,100%{opacity:0;transform:scale(0.5);}
+    50%{opacity:var(--op,0.8);transform:scale(1);}
+  }
+  .magic-particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: float-up var(--dur,6s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes float-up {
+    0%{opacity:0;transform:translateY(0) scale(0);}
+    20%{opacity:0.8;transform:translateY(-40px) scale(1);}
+    100%{opacity:0;transform:translateY(-200px) scale(0);}
+  }
+  .lightning {
+    position: absolute;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, #8844ff, #cc44ff, transparent);
+    animation: lightning-flash var(--dur,8s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes lightning-flash {
+    0%,90%,100%{opacity:0;}
+    92%,96%{opacity:0.6;}
+    94%{opacity:0;}
+  }
+
+  /* ===== LAYOUT ===== */
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    animation: fadeIn 0.6s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+  /* ===== DECORATIVE ELEMENTS ===== */
+  .magic-border {
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 15px rgba(240,192,64,0.3), inset 0 0 15px rgba(240,192,64,0.05);
+    border-radius: 8px;
+    position: relative;
+  }
+  .magic-border::before, .magic-border::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 18px;
+  }
+  .magic-border::before { top: -12px; right: 10px; }
+  .magic-border::after { bottom: -12px; left: 10px; }
+
+  .corner-deco {
+    position: absolute;
+    width: 30px; height: 30px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.6;
+  }
+  .corner-deco.tl { top:0;right:0; border-width: 2px 0 0 2px; border-radius: 0 0 0 6px; }
+  .corner-deco.tr { top:0;left:0; border-width: 2px 2px 0 0; border-radius: 0 0 6px 0; }
+  .corner-deco.bl { bottom:0;right:0; border-width: 0 0 2px 2px; border-radius: 6px 0 0 0; }
+  .corner-deco.br { bottom:0;left:0; border-width: 0 2px 2px 0; border-radius: 0 6px 0 0; }
+
+  /* ===== TYPOGRAPHY ===== */
+  .title-main {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(240,192,64,0.8), 0 0 60px rgba(240,192,64,0.4);
+    text-align: center;
+    letter-spacing: 4px;
+    line-height: 1.3;
+  }
+  .title-sub {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2.5vw, 22px);
+    color: var(--silver);
+    text-align: center;
+    letter-spacing: 3px;
+    margin-top: 8px;
+  }
+  .arabic-title {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 900;
+    font-size: clamp(22px, 4vw, 38px);
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(240,192,64,0.6);
+    text-align: center;
+  }
+
+  /* ===== STORY SCREEN ===== */
+  .story-container {
+    max-width: 900px;
+    width: 100%;
+    padding: 40px 20px;
+  }
+  .hogwarts-crest {
+    font-size: 80px;
+    text-align: center;
+    animation: pulse-glow 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(240,192,64,0.6));
+  }
+  @keyframes pulse-glow {
+    0%,100%{filter:drop-shadow(0 0 20px rgba(240,192,64,0.4));}
+    50%{filter:drop-shadow(0 0 40px rgba(240,192,64,0.9));}
+  }
+
+  .story-text {
+    background: rgba(10,0,30,0.8);
+    border: 1px solid rgba(240,192,64,0.3);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+    font-size: clamp(14px, 2vw, 17px);
+    line-height: 2;
+    color: var(--parchment);
+    position: relative;
+  }
+  .story-text .corner-deco { }
+  .story-highlight {
+    color: var(--gold);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(240,192,64,0.5);
+  }
+  .voldemort-text {
+    color: var(--bright-red);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(204,34,0,0.7);
+    animation: flicker 3s infinite;
+  }
+  @keyframes flicker {
+    0%,98%,100%{opacity:1;}
+    99%{opacity:0.6;}
+  }
+
+  /* ===== HOUSES ===== */
+  .houses-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  @media(min-width:600px){ .houses-grid { grid-template-columns: repeat(4,1fr); } }
+
+  .house-card {
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .house-card:hover { transform: translateY(-4px); }
+  .house-card.selected { transform: scale(1.05); }
+
+  .house-card[data-house="gryffindor"] { border-color: #ae0001; }
+  .house-card[data-house="gryffindor"].selected { background: rgba(174,0,1,0.25); box-shadow: 0 0 20px rgba(174,0,1,0.5); }
+  .house-card[data-house="slytherin"] { border-color: #1a472a; }
+  .house-card[data-house="slytherin"].selected { background: rgba(26,71,42,0.35); box-shadow: 0 0 20px rgba(26,71,42,0.7); }
+  .house-card[data-house="ravenclaw"] { border-color: #0e1a40; }
+  .house-card[data-house="ravenclaw"].selected { background: rgba(14,26,64,0.35); box-shadow: 0 0 20px rgba(14,26,100,0.7); }
+  .house-card[data-house="hufflepuff"] { border-color: #ecb939; }
+  .house-card[data-house="hufflepuff"].selected { background: rgba(236,185,57,0.2); box-shadow: 0 0 20px rgba(236,185,57,0.5); }
+
+  .house-emoji { font-size: 48px; display: block; margin-bottom: 8px; }
+  .house-name-ar { font-weight: 700; font-size: 15px; color: var(--parchment); }
+  .house-name-en { font-size: 11px; color: var(--silver); opacity: 0.7; margin-top: 3px; }
+  .house-trait { font-size: 11px; margin-top: 5px; font-style: italic; opacity: 0.8; }
+
+  .house-card[data-house="gryffindor"] .house-trait { color: #ff6666; }
+  .house-card[data-house="slytherin"] .house-trait { color: #66cc88; }
+  .house-card[data-house="ravenclaw"] .house-trait { color: #6688ff; }
+  .house-card[data-house="hufflepuff"] .house-trait { color: #ffdd66; }
+
+  /* ===== FORM ELEMENTS ===== */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .input-group label {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 15px;
+  }
+  .magic-input {
+    background: rgba(10,0,30,0.8);
+    border: 1.5px solid rgba(240,192,64,0.4);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--parchment);
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    direction: rtl;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    width: 100%;
+  }
+  .magic-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(240,192,64,0.3);
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-magic {
+    background: linear-gradient(135deg, #4a2080, #8b006b);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    padding: 14px 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 2px;
+    box-shadow: 0 0 20px rgba(240,192,64,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-magic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+  .btn-magic:hover {
+    background: linear-gradient(135deg, #6a30a0, #bb0088);
+    box-shadow: 0 0 30px rgba(240,192,64,0.5);
+    transform: translateY(-2px);
+  }
+  .btn-magic:hover::before { transform: translateX(100%); }
+  .btn-magic:active { transform: translateY(0); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #5a0000, #8b0000);
+    border-color: var(--bright-red);
+    color: #ffaaaa;
+  }
+  .btn-danger:hover { background: linear-gradient(135deg, #7a0000, #cc0000); }
+
+  /* ===== TIMER ===== */
+  #timer-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+  }
+  #timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #ffdd00, #ff4400);
+    transition: width 1s linear, background-color 1s;
+  }
+  #timer-display {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,0,30,0.9);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 6px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--gold);
+    z-index: 100;
+    letter-spacing: 3px;
+    display: none;
+  }
+  #timer-display.urgent { color: var(--bright-red); animation: blink-urgent 0.5s infinite; }
+  @keyframes blink-urgent { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+  /* ===== STAGE HEADER ===== */
+  .stage-header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    max-width: 800px;
+    width: 100%;
+  }
+  .stage-number {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--silver);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .stage-location {
+    display: inline-block;
+    background: rgba(240,192,64,0.1);
+    border: 1px solid rgba(240,192,64,0.3);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .progress-dots {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 12px 0;
+  }
+  .progress-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    transition: background 0.3s;
+  }
+  .progress-dot.done { background: var(--gold); }
+  .progress-dot.current { background: rgba(240,192,64,0.4); animation: dot-pulse 1s infinite; }
+  @keyframes dot-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,192,64,0.5);} 50%{box-shadow:0 0 0 6px rgba(240,192,64,0);} }
+
+  /* ===== QUESTION CARDS ===== */
+  .questions-container {
+    max-width: 800px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+  .question-card {
+    background: rgba(10,0,30,0.85);
+    border: 1px solid rgba(240,192,64,0.25);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .question-card.answered { border-color: rgba(0,255,136,0.4); }
+  .question-number {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--light-purple);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 2px 12px;
+    font-size: 12px;
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .question-text {
+    font-size: clamp(14px, 2vw, 16px);
+    line-height: 2;
+    margin-bottom: 16px;
+    color: var(--parchment);
+  }
+  .question-text strong { color: var(--gold); }
+  .formula-box {
+    background: rgba(240,192,64,0.05);
+    border: 1px dashed rgba(240,192,64,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #aaddff;
+    direction: ltr;
+    text-align: left;
+  }
+  .answer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .answer-label { color: var(--gold); font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .answer-input {
+    background: rgba(0,0,0,0.5);
+    border: 1.5px solid rgba(240,192,64,0.35);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--parchment);
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    width: 120px;
+    direction: ltr;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .answer-input:focus { outline:none; border-color: var(--gold); box-shadow: 0 0 10px rgba(240,192,64,0.3); }
+  .answer-input.correct { border-color: var(--glow-green); color: var(--glow-green); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+  .answer-input.wrong { border-color: var(--bright-red); color: var(--bright-red); animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  .answer-unit { color: var(--silver); font-size: 13px; }
+  .check-btn {
+    background: rgba(240,192,64,0.1);
+    border: 1px solid rgba(240,192,64,0.4);
+    color: var(--gold);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    transition: all 0.3s;
+    margin-top: 4px;
+  }
+  .check-btn:hover { background: rgba(240,192,64,0.2); }
+  .feedback-msg {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 20px;
+    transition: all 0.3s;
+  }
+  .feedback-msg.correct { color: var(--glow-green); }
+  .feedback-msg.wrong { color: #ff8888; }
+
+  /* ===== CODE UNLOCK ===== */
+  .code-section {
+    max-width: 800px;
+    width: 100%;
+    padding: 20px;
+  }
+  .code-hint {
+    background: rgba(240,192,64,0.07);
+    border: 1px solid rgba(240,192,64,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--parchment);
+  }
+  .code-hint strong { color: var(--gold); }
+  .code-entry {
+    background: rgba(10,0,30,0.9);
+    border: 2px solid rgba(240,192,64,0.3);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+  }
+  .lock-icon { font-size: 50px; animation: float-lock 3s ease-in-out infinite; }
+  @keyframes float-lock { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+  .code-label { font-size: 15px; color: var(--silver); margin: 12px 0 20px; }
+  .code-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .code-digit {
+    width: 60px; height: 70px;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(240,192,64,0.4);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 28px;
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    direction: ltr;
+    transition: all 0.3s;
+  }
+  .code-digit:focus { outline:none; border-color: var(--gold); box-shadow: 0 0 15px rgba(240,192,64,0.4); }
+  .code-digit.correct-digit { border-color: var(--glow-green); color: var(--glow-green); box-shadow: 0 0 15px rgba(0,255,136,0.4); }
+  .code-digit.wrong-digit { border-color: var(--bright-red); animation: shake 0.4s; }
+  .unlock-result { margin-top: 16px; min-height: 30px; font-size: 16px; font-weight: 700; }
+  .unlock-result.success { color: var(--glow-green); }
+  .unlock-result.fail { color: #ff8888; }
+
+  .spell-unlocked {
+    display: none;
+    background: linear-gradient(135deg, rgba(0,80,0,0.3), rgba(0,40,0,0.5));
+    border: 2px solid var(--glow-green);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    animation: appear-glow 0.5s ease;
+  }
+  @keyframes appear-glow {
+    from{opacity:0;transform:scale(0.9);}
+    to{opacity:1;transform:scale(1);}
+  }
+  .spell-unlocked.show { display: block; }
+  .spell-icon { font-size: 40px; margin-bottom: 8px; }
+  .spell-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 22px;
+    color: var(--glow-green);
+    text-shadow: 0 0 20px rgba(0,255,136,0.7);
+  }
+  .spell-desc { font-size: 14px; color: var(--silver); margin-top: 8px; }
+
+  /* ===== FINAL VICTORY ===== */
+  .victory-screen {
+    text-align: center;
+    max-width: 700px;
+    padding: 40px 20px;
+  }
+  .victory-animation {
+    font-size: 80px;
+    animation: victory-bounce 0.6s ease infinite alternate;
+  }
+  @keyframes victory-bounce {
+    from{transform:scale(1) rotate(-5deg);}
+    to{transform:scale(1.1) rotate(5deg);}
+  }
+  .firework {
+    position: fixed;
+    pointer-events: none;
+    z-index: 200;
+    font-size: 30px;
+    animation: firework-fly 1.5s ease-out forwards;
+  }
+  @keyframes firework-fly {
+    0%{opacity:1;transform:translate(0,0) scale(0.5);}
+    100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1.5);}
+  }
+  .team-badge {
+    display: inline-block;
+    background: rgba(240,192,64,0.1);
+    border: 2px solid var(--gold);
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 12px 0;
+  }
+  .spell-collection {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .spell-piece {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.4);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--glow-green);
+  }
+
+  /* ===== STAGE 4 SPECIAL ===== */
+  .diagram-box {
+    background: rgba(0,10,40,0.8);
+    border: 1px solid rgba(100,150,255,0.3);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    display: flex;
+    justify-content: center;
+  }
+  svg.physics-diagram { max-width: 100%; }
+
+  .multi-answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  @media(max-width:500px){ .multi-answer-grid { grid-template-columns: 1fr; } }
+  .answer-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .answer-field label { font-size: 13px; color: var(--gold); }
+
+  /* ===== HINTS ===== */
+  .hint-toggle {
+    background: none;
+    border: 1px dashed rgba(240,192,64,0.3);
+    color: rgba(240,192,64,0.6);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    margin-top: 10px;
+    transition: all 0.3s;
+  }
+  .hint-toggle:hover { border-color: var(--gold); color: var(--gold); }
+  .hint-box {
+    display: none;
+    background: rgba(240,192,64,0.05);
+    border-right: 3px solid rgba(240,192,64,0.4);
+    padding: 10px 14px;
+    margin-top: 10px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: rgba(240,192,64,0.8);
+    line-height: 1.8;
+    direction: rtl;
+  }
+  .hint-box.show { display: block; }
+
+  /* ===== NAVIGATION ===== */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    width: 100%;
+    padding: 10px 20px 20px;
+  }
+  .team-info-bar {
+    background: rgba(10,0,30,0.7);
+    border: 1px solid rgba(240,192,64,0.2);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--silver);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .team-house-badge {
+    font-size: 18px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:600px) {
+    .code-digit { width:50px; height:60px; font-size:22px; }
+    .multi-answer-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ===== TIMEOUT SCREEN ===== */
+  #timeout-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0,0,0,0.92);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+    animation: fadeIn 0.5s;
+  }
+  #timeout-screen.show { display: flex; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--deep-purple); }
+  ::-webkit-scrollbar-thumb { background: var(--dark-gold); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Magic Background -->
+<div id="magic-bg" aria-hidden="true"></div>
+
+<!-- Timer Bar -->
+<div id="timer-bar"><div id="timer-fill" style="width:100%"></div></div>
+<div id="timer-display">⏳ 45:00</div>
+
+<!-- Timeout Screen -->
+<div id="timeout-screen">
+  <div style="font-size:80px">⌛</div>
+  <h2 class="title-main" style="font-size:32px;margin:20px 0">انتهى الوقت!</h2>
+  <p style="font-size:18px;color:var(--silver);margin-bottom:30px">
+    لقد استولى فولديمورت على هوجوورتس... هذه المرة.<br>
+    لكن الشجاعة تعني المحاولة مرة أخرى!
+  </p>
+  <button class="btn-magic btn-danger" onclick="restartGame()">🔁 إعادة المحاولة</button>
+</div>
+
+<div id="app">
+
+<!-- ============================================================ -->
+<!-- SCREEN 0: STORY / INTRO                                       -->
+<!-- ============================================================ -->
+<div id="screen-story" class="screen active">
+  <div class="story-container">
+
+    <div style="text-align:center;margin-bottom:30px">
+      <div class="hogwarts-crest">⚡🏰✨</div>
+      <h1 class="title-main" style="margin-top:16px">HOGWARTS</h1>
+      <p class="title-sub">PHYSICS ESCAPE ROOM</p>
+      <p class="arabic-title" style="margin-top:12px">غرفة الهروب الفيزيائية</p>
+    </div>
+
+    <div class="story-text magic-border">
+      <div class="corner-deco tl"></div>
+      <div class="corner-deco tr"></div>
+      <div class="corner-deco bl"></div>
+      <div class="corner-deco br"></div>
+      <p>
+        🌑 في ليلة مظلمة من ليالي هوجوورتس، أثناء جولتكم في الأروقة المسحورة...
+        <strong class="story-highlight">ضللتم الطريق!</strong>
+      </p>
+      <br>
+      <p>
+        فجأة، يرتجف القلعة... ويُسمع صوت مرعب يتردد بين الجدران:
+        <br><em class="voldemort-text">"المُدبِّرون المحظوظون... لا مفرّ لكم هذه المرة..."</em>
+      </p>
+      <br>
+      <p>
+        🧙 <strong class="story-highlight">اللورد فولديمورت</strong> يتقدم نحوكم عبر الغرف الأربع!
+        الطريق الوحيد للنجاة: جمع <strong class="story-highlight">أجزاء تعويذة Expelliarmus</strong>
+        المخفية في كل قاعة.
+      </p>
+      <br>
+      <p>
+        ⚗️ كل قاعة محمية بـ<strong class="story-highlight">قفل فيزيائي</strong> يعمل بقوانين
+        <em style="color:#aaddff">السقوط الحر وتسارع الجاذبية</em>.
+        حلّوا المسائل، اكسبوا الكود، وانتزعوا جزء التعويذة قبل فوات الأوان!
+      </p>
+      <br>
+      <p style="text-align:center;color:var(--gold);font-size:13px">
+        📌 <strong>g = 10 m/s²</strong> | تجاهلوا مقاومة الهواء | الأعلى اتجاه موجب ما لم يُذكر غير ذلك
+      </p>
+    </div>
+
+    <!-- Team Registration -->
+    <div class="story-text" style="margin-top:20px">
+      <h3 style="color:var(--gold);margin-bottom:20px;font-size:18px;text-align:center">⚡ تسجيل الفريق</h3>
+
+      <div class="input-group">
+        <label for="teamName">🧑‍🤝‍🧑 اسم مجموعتكم</label>
+        <input type="text" id="teamName" class="magic-input" placeholder="مثال: فرقة الفينيق" maxlength="30">
+      </div>
+
+      <div style="margin:20px 0">
+        <label style="color:var(--gold);font-weight:700;font-size:15px;display:block;margin-bottom:14px">
+          🏰 اختاروا بيتكم في هوجوورتس:
+        </label>
+        <div class="houses-grid">
+          <div class="house-card" data-house="gryffindor" onclick="selectHouse(this)">
+            <span class="house-emoji">🦁</span>
+            <div class="house-name-ar">غريفيندور</div>
+            <div class="house-name-en">Gryffindor</div>
+            <div class="house-trait">الشجاعة والجرأة</div>
+          </div>
+          <div class="house-card" data-house="slytherin" onclick="selectHouse(this)">
+            <span class="house-emoji">🐍</span>
+            <div class="house-name-ar">سلذرين</div>
+            <div class="house-name-en">Slytherin</div>
+            <div class="house-trait">الذكاء والطموح</div>
+          </div>
+          <div class="house-card" data-house="ravenclaw" onclick="selectHouse(this)">
+            <span class="house-emoji">🦅</span>
+            <div class="house-name-ar">رافنكلو</div>
+            <div class="house-name-en">Ravenclaw</div>
+            <div class="house-trait">الحكمة والإبداع</div>
+          </div>
+          <div class="house-card" data-house="hufflepuff" onclick="selectHouse(this)">
+            <span class="house-emoji">🦡</span>
+            <div class="house-name-ar">هوفلبوف</div>
+            <div class="house-name-en">Hufflepuff</div>
+            <div class="house-trait">الولاء والصبر</div>
+          </div>
+        </div>
+        <div id="house-error" style="color:#ff8888;font-size:13px;text-align:center;min-height:20px;margin-top:4px"></div>
+      </div>
+
+      <div style="text-align:center;margin-top:10px">
+        <p style="color:var(--silver);font-size:14px;margin-bottom:20px">
+          ⏱️ لديكم <strong style="color:var(--gold)">45 دقيقة</strong> لإتمام المهمة وإنقاذ هوجوورتس!
+        </p>
+        <button class="btn-magic" onclick="startGame()">
+          🔮 ابدأوا المهمة — Lumos!
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 1: STAGE 1 — قاعة التاريخ السحري                     -->
+<!-- ============================================================ -->
+<div id="screen-stage1" class="screen">
+  <div class="stage-header">
+    <div class="stage-number">المرحلة الأولى من أربعة</div>
+    <h2 class="arabic-title">📚 قاعة التاريخ السحري</h2>
+    <div class="stage-location">السقوط الحر من الراحة</div>
+    <div class="progress-dots">
+      <div class="progress-dot current" id="dot1-1"></div>
+      <div class="progress-dot" id="dot1-2"></div>
+      <div class="progress-dot" id="dot1-3"></div>
+      <div class="progress-dot" id="dot1-4"></div>
+    </div>
+    <p style="color:var(--silver);font-size:14px">
+      🔐 الجزء الأول من تعويذة Expelliarmus مخبأ هنا.<br>
+      أجيبوا على الأسئلة الثلاثة واكتشفوا الكود!
+    </p>
+  </div>
+
+  <div class="questions-container">
+
+    <!-- Q1 -->
+    <div class="question-card" id="q1-1">
+      <div class="question-number">⚡ السؤال الأول</div>
+      <p class="question-text">
+        رمى <strong>هاري</strong> كرة الكيدش من قمة برج هوجوورتس <strong>من الراحة تماماً</strong>.
+        بعد <strong>3 ثوانٍ</strong> من السقوط، ما هي سرعة الكرة؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a1-1" placeholder="؟؟">
+        <span class="answer-unit">m/s</span>
+        <button class="check-btn" onclick="checkAnswer(1,1,30,'m/s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb1-1"></div>
+      <button class="hint-toggle" onclick="toggleHint('h1-1')">💡 تلميح</button>
+      <div class="hint-box" id="h1-1">الجسم يبدأ من السكون: v₀ = 0<br>استخدم: v = 0 + (10)(3) = ؟</div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card" id="q1-2">
+      <div class="question-number">⚡ السؤال الثاني</div>
+      <p class="question-text">
+        سقطت <strong>قبعة هيرميون</strong> من نافذة برج غريفيندور واستغرق سقوطها
+        <strong>4 ثوانٍ</strong> حتى وصلت للأرض. من أي ارتفاع سقطت؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a1-2" placeholder="؟؟">
+        <span class="answer-unit">m</span>
+        <button class="check-btn" onclick="checkAnswer(1,2,80,'m')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb1-2"></div>
+      <button class="hint-toggle" onclick="toggleHint('h1-2')">💡 تلميح</button>
+      <div class="hint-box" id="h1-2">h = ½ × 10 × (4)² = 5 × 16 = ؟</div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card" id="q1-3">
+      <div class="question-number">⚡ السؤال الثالث</div>
+      <p class="question-text">
+        أسقط <strong>رون</strong> عصاه السحرية من أعلى السلم الدوّار من ارتفاع
+        <strong>45 m</strong>. كم من الزمن استغرقت لتصل إلى الأرض؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a1-3" placeholder="؟؟">
+        <span class="answer-unit">s</span>
+        <button class="check-btn" onclick="checkAnswer(1,3,3,'s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb1-3"></div>
+      <button class="hint-toggle" onclick="toggleHint('h1-3')">💡 تلميح</button>
+      <div class="hint-box" id="h1-3">t = √(2×45 / 10) = √(9) = ؟</div>
+    </div>
+
+  </div>
+
+  <!-- Code Entry Stage 1 -->
+  <div class="code-section" id="code-section-1" style="display:none">
+    <div class="code-hint">
+      🔑 <strong>كيف تجدون الكود؟</strong><br>
+      خذوا <strong>أول رقم</strong> من كل جواب بالترتيب:<br>
+      من الجواب الأول (__ m/s) ← الرقم الأول<br>
+      من الجواب الثاني (__ m) ← الرقم الأول<br>
+      من الجواب الثالث (__ s) ← الرقم نفسه
+    </div>
+    <div class="code-entry magic-border">
+      <div class="corner-deco tl"></div>
+      <div class="corner-deco tr"></div>
+      <div class="corner-deco bl"></div>
+      <div class="corner-deco br"></div>
+      <div class="lock-icon">🔐</div>
+      <p class="code-label">أدخلوا كود القاعة — ثلاثة أرقام</p>
+      <div class="code-inputs">
+        <input type="number" class="code-digit" id="cd1-1" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd1-2" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd1-3" maxlength="1" min="0" max="9" placeholder="-">
+      </div>
+      <button class="btn-magic" onclick="checkCode(1, '383')">🗝️ افتح القفل</button>
+      <div class="unlock-result" id="ur1"></div>
+    </div>
+
+    <div class="spell-unlocked" id="spell1">
+      <div class="spell-icon">✨</div>
+      <div class="spell-name">Expell...</div>
+      <div class="spell-desc">الجزء الأول من التعويذة في حوزتكم! تابعوا إلى القاعة التالية...</div>
+      <br>
+      <button class="btn-magic" onclick="goToStage(2)" style="margin-top:10px">
+        🚪 إلى قاعة الكيمياء السحرية ←
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div class="team-info-bar">
+      <span class="team-house-badge" id="nav-house-1">🏰</span>
+      <span id="nav-team-1">فريقكم</span>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 2: STAGE 2 — قاعة الكيمياء السحرية                  -->
+<!-- ============================================================ -->
+<div id="screen-stage2" class="screen">
+  <div class="stage-header">
+    <div class="stage-number">المرحلة الثانية من أربعة</div>
+    <h2 class="arabic-title">⚗️ قاعة الكيمياء السحرية</h2>
+    <div class="stage-location">الرمي للأعلى — السرعة الابتدائية</div>
+    <div class="progress-dots">
+      <div class="progress-dot done" id="dot2-1"></div>
+      <div class="progress-dot current" id="dot2-2"></div>
+      <div class="progress-dot" id="dot2-3"></div>
+      <div class="progress-dot" id="dot2-4"></div>
+    </div>
+  </div>
+
+  <div class="questions-container">
+
+    <!-- Q1 -->
+    <div class="question-card" id="q2-1">
+      <div class="question-number">⚡ السؤال الأول</div>
+      <p class="question-text">
+        رمت <strong>هيرميون</strong> كتاب التعاويذ للأعلى بسرعة <strong>20 m/s</strong>.
+        إلى أي ارتفاع أقصى وصل الكتاب؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a2-1" placeholder="؟؟">
+        <span class="answer-unit">m</span>
+        <button class="check-btn" onclick="checkAnswer(2,1,20,'m')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb2-1"></div>
+      <button class="hint-toggle" onclick="toggleHint('h2-1')">💡 تلميح</button>
+      <div class="hint-box" id="h2-1">0 = (20)² - 2×10×h → 0 = 400 - 20h → h = ؟</div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card" id="q2-2">
+      <div class="question-number">⚡ السؤال الثاني</div>
+      <p class="question-text">
+        رمى <strong>هاري</strong> كرةً للأعلى فوصلت لأعلى نقطة بعد <strong>3 ثوانٍ</strong>.
+        ما كانت سرعته الابتدائية لحظة الرمي؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a2-2" placeholder="؟؟">
+        <span class="answer-unit">m/s</span>
+        <button class="check-btn" onclick="checkAnswer(2,2,30,'m/s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb2-2"></div>
+      <button class="hint-toggle" onclick="toggleHint('h2-2')">💡 تلميح</button>
+      <div class="hint-box" id="h2-2">0 = v₀ - 10×3 → v₀ = ؟</div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card" id="q2-3">
+      <div class="question-number">⚡ السؤال الثالث</div>
+      <p class="question-text">
+        رمى <strong>نيفيل</strong> كرةً للأعلى بسرعة <strong>25 m/s</strong>.
+        كم من الزمن تستغرق الكرة لتعود إلى <em>نفس نقطة الرمي</em>؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a2-3" placeholder="؟؟">
+        <span class="answer-unit">s</span>
+        <button class="check-btn" onclick="checkAnswer(2,3,5,'s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb2-3"></div>
+      <button class="hint-toggle" onclick="toggleHint('h2-3')">💡 تلميح</button>
+      <div class="hint-box" id="h2-3">الزمن للأعلى = v₀/g = 25/10 = 2.5s<br>الزمن الكلي = 2 × 2.5 = ؟</div>
+    </div>
+
+  </div>
+
+  <!-- Code Entry Stage 2 -->
+  <div class="code-section" id="code-section-2" style="display:none">
+    <div class="code-hint">
+      🔑 <strong>كيف تجدون الكود؟</strong><br>
+      خذوا <strong>أول رقم</strong> من كل جواب بالترتيب:<br>
+      من الجواب الأول (__ m) ← الرقم الأول<br>
+      من الجواب الثاني (__ m/s) ← الرقم الأول<br>
+      من الجواب الثالث (__ s) ← الرقم نفسه
+    </div>
+    <div class="code-entry magic-border">
+      <div class="corner-deco tl"></div>
+      <div class="corner-deco tr"></div>
+      <div class="corner-deco bl"></div>
+      <div class="corner-deco br"></div>
+      <div class="lock-icon">🔐</div>
+      <p class="code-label">أدخلوا كود القاعة — ثلاثة أرقام</p>
+      <div class="code-inputs">
+        <input type="number" class="code-digit" id="cd2-1" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd2-2" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd2-3" maxlength="1" min="0" max="9" placeholder="-">
+      </div>
+      <button class="btn-magic" onclick="checkCode(2, '235')">🗝️ افتح القفل</button>
+      <div class="unlock-result" id="ur2"></div>
+    </div>
+
+    <div class="spell-unlocked" id="spell2">
+      <div class="spell-icon">✨</div>
+      <div class="spell-name">Expellia...</div>
+      <div class="spell-desc">الجزء الثاني محفوظ! فولديمورت يتراجع قليلاً... استمروا!</div>
+      <br>
+      <button class="btn-magic" onclick="goToStage(3)" style="margin-top:10px">
+        🚪 إلى مختبر الإكسير ←
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div class="team-info-bar">
+      <span class="team-house-badge" id="nav-house-2">🏰</span>
+      <span id="nav-team-2">فريقكم</span>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 3: STAGE 3 — مختبر الإكسير السحري                   -->
+<!-- ============================================================ -->
+<div id="screen-stage3" class="screen">
+  <div class="stage-header">
+    <div class="stage-number">المرحلة الثالثة من أربعة</div>
+    <h2 class="arabic-title">🧪 مختبر الإكسير السحري</h2>
+    <div class="stage-location">سقوط بسرعة ابتدائية — تطبيقات</div>
+    <div class="progress-dots">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-dot current"></div>
+      <div class="progress-dot"></div>
+    </div>
+  </div>
+
+  <div class="questions-container">
+
+    <!-- Q1 -->
+    <div class="question-card" id="q3-1">
+      <div class="question-number">⚡ السؤال الأول</div>
+      <p class="question-text">
+        أُلقيت <strong>جرّة إكسير سحري</strong> من برج المختبر للأسفل بسرعة ابتدائية
+        <strong>5 m/s نحو الأسفل</strong>. بعد <strong>4 ثوانٍ</strong>، ما هي سرعتها؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a3-1" placeholder="؟؟">
+        <span class="answer-unit">m/s</span>
+        <button class="check-btn" onclick="checkAnswer(3,1,45,'m/s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb3-1"></div>
+      <button class="hint-toggle" onclick="toggleHint('h3-1')">💡 تلميح</button>
+      <div class="hint-box" id="h3-1">v = 5 + 10×4 = 5 + 40 = ؟</div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card" id="q3-2">
+      <div class="question-number">⚡ السؤال الثاني</div>
+      <p class="question-text">
+        سقطت <strong>قنينة دواء الشفاء</strong> من ارتفاع <strong>80 m</strong>
+        <em>(من الراحة، v₀ = 0)</em>. ما سرعتها لحظة وصولها للأرض؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a3-2" placeholder="؟؟">
+        <span class="answer-unit">m/s</span>
+        <button class="check-btn" onclick="checkAnswer(3,2,40,'m/s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb3-2"></div>
+      <button class="hint-toggle" onclick="toggleHint('h3-2')">💡 تلميح</button>
+      <div class="hint-box" id="h3-2">v² = 0 + 2×10×80 = 1600 → v = √1600 = ؟</div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card" id="q3-3">
+      <div class="question-number">⚡ السؤال الثالث</div>
+      <p class="question-text">
+        أسقط <strong>بروفيسور دمبلدور</strong> مرآة سحرية <em>(من الراحة)</em>
+        من ارتفاع <strong>125 m</strong>. كم من الزمن تستغرق لتصل للأرض؟
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">الجواب:</span>
+        <input type="number" class="answer-input" id="a3-3" placeholder="؟؟">
+        <span class="answer-unit">s</span>
+        <button class="check-btn" onclick="checkAnswer(3,3,5,'s')">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb3-3"></div>
+      <button class="hint-toggle" onclick="toggleHint('h3-3')">💡 تلميح</button>
+      <div class="hint-box" id="h3-3">t = √(2×125 / 10) = √(25) = ؟</div>
+    </div>
+
+  </div>
+
+  <!-- Code Entry Stage 3 -->
+  <div class="code-section" id="code-section-3" style="display:none">
+    <div class="code-hint">
+      🔑 <strong>كيف تجدون الكود؟</strong><br>
+      خذوا <strong>أول رقم</strong> من كل جواب بالترتيب:<br>
+      من الجواب الأول (__ m/s) ← الرقم الأول<br>
+      من الجواب الثاني (__ m/s) ← الرقم الأول<br>
+      من الجواب الثالث (__ s) ← الرقم نفسه
+    </div>
+    <div class="code-entry magic-border">
+      <div class="corner-deco tl"></div>
+      <div class="corner-deco tr"></div>
+      <div class="corner-deco bl"></div>
+      <div class="corner-deco br"></div>
+      <div class="lock-icon">🔐</div>
+      <p class="code-label">أدخلوا كود القاعة — ثلاثة أرقام</p>
+      <div class="code-inputs">
+        <input type="number" class="code-digit" id="cd3-1" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd3-2" maxlength="1" min="0" max="9" placeholder="-">
+        <input type="number" class="code-digit" id="cd3-3" maxlength="1" min="0" max="9" placeholder="-">
+      </div>
+      <button class="btn-magic" onclick="checkCode(3, '445')">🗝️ افتح القفل</button>
+      <div class="unlock-result" id="ur3"></div>
+    </div>
+
+    <div class="spell-unlocked" id="spell3">
+      <div class="spell-icon">✨</div>
+      <div class="spell-name">Expelliar...</div>
+      <div class="spell-desc">ثلاثة أجزاء! فولديمورت يضعف... جزء أخير ينتظركم في القاعة الكبرى!</div>
+      <br>
+      <button class="btn-magic" onclick="goToStage(4)" style="margin-top:10px">
+        🚪 إلى القاعة الكبرى — المواجهة النهائية ←
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div class="team-info-bar">
+      <span class="team-house-badge" id="nav-house-3">🏰</span>
+      <span id="nav-team-3">فريقكم</span>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 4: STAGE 4 — القاعة الكبرى (المركبة)                -->
+<!-- ============================================================ -->
+<div id="screen-stage4" class="screen">
+  <div class="stage-header">
+    <div class="stage-number">المرحلة الأخيرة — المواجهة النهائية!</div>
+    <h2 class="arabic-title" style="color:#ff4444;text-shadow:0 0 30px rgba(255,68,68,0.7)">
+      ⚡ القاعة الكبرى ⚡
+    </h2>
+    <div class="stage-location" style="border-color:rgba(255,68,68,0.4);color:#ff8888">جسمان في حركة متزامنة</div>
+    <div class="progress-dots">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-dot done"></div>
+      <div class="progress-dot current" style="border-color:#ff4444"></div>
+    </div>
+    <p style="color:#ff8888;font-size:14px;margin-top:8px">
+      🌑 فولديمورت في الغرفة! هذه مسألتكم الأخيرة — ركّزوا!
+    </p>
+  </div>
+
+  <div class="questions-container">
+
+    <!-- MAIN COMPLEX PROBLEM -->
+    <div class="question-card" id="q4-main" style="border-color:rgba(255,100,100,0.3)">
+      <div class="question-number" style="background:#4a0000;border-color:#cc2200;color:#ff8888">🌑 المسألة المركبة</div>
+
+      <p class="question-text">
+        في نفس اللحظة تماماً، داخل برج هوجوورتس العالي:
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0">
+        <div style="background:rgba(0,50,150,0.2);border:1px solid rgba(100,150,255,0.3);border-radius:8px;padding:14px">
+          <div style="font-size:22px;text-align:center;margin-bottom:6px">🔵</div>
+          <p style="font-size:13px;color:#aaddff;text-align:center;line-height:1.8">
+            <strong>الجسم A</strong><br>
+            يُسقط من الراحة<br>
+            من ارتفاع <strong style="color:var(--gold)">60 m</strong> عن الأرض<br>
+            <em>(v₀ = 0)</em>
+          </p>
+        </div>
+        <div style="background:rgba(150,0,0,0.2);border:1px solid rgba(255,100,100,0.3);border-radius:8px;padding:14px">
+          <div style="font-size:22px;text-align:center;margin-bottom:6px">🔴</div>
+          <p style="font-size:13px;color:#ffaaaa;text-align:center;line-height:1.8">
+            <strong>الجسم B</strong><br>
+            يُرمى من سطح الأرض<br>
+            للأعلى بسرعة <strong style="color:var(--gold)">20 m/s</strong><br>
+            <em>(اتجاه الأعلى موجب ↑)</em>
+          </p>
+        </div>
+      </div>
+
+      <!-- Physics Diagram SVG -->
+      <div class="diagram-box">
+        <svg class="physics-diagram" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" style="max-height:240px">
+          <!-- Background -->
+          <rect width="320" height="240" fill="#00001a" rx="8"/>
+          <!-- Ground -->
+          <rect x="20" y="210" width="280" height="4" fill="#886644" rx="2"/>
+          <line x1="20" y1="214" x2="300" y2="214" stroke="#664422" stroke-width="1"/>
+          <!-- Hatching ground -->
+          <g stroke="#553322" stroke-width="0.8" opacity="0.5">
+            <line x1="30" y1="214" x2="22" y2="222"/>
+            <line x1="50" y1="214" x2="42" y2="222"/>
+            <line x1="70" y1="214" x2="62" y2="222"/>
+            <line x1="90" y1="214" x2="82" y2="222"/>
+            <line x1="110" y1="214" x2="102" y2="222"/>
+            <line x1="130" y1="214" x2="122" y2="222"/>
+            <line x1="150" y1="214" x2="142" y2="222"/>
+            <line x1="170" y1="214" x2="162" y2="222"/>
+            <line x1="190" y1="214" x2="182" y2="222"/>
+            <line x1="210" y1="214" x2="202" y2="222"/>
+            <line x1="230" y1="214" x2="222" y2="222"/>
+            <line x1="250" y1="214" x2="242" y2="222"/>
+            <line x1="270" y1="214" x2="262" y2="222"/>
+            <line x1="290" y1="214" x2="282" y2="222"/>
+          </g>
+          <!-- Tower/Wall suggestion on right -->
+          <rect x="220" y="30" width="60" height="180" fill="#1a1a3a" stroke="#334466" stroke-width="1" rx="2"/>
+          <rect x="225" y="35" width="20" height="30" fill="#0a0a20" stroke="#223355" stroke-width="1"/>
+          <rect x="255" y="35" width="20" height="30" fill="#0a0a20" stroke="#223355" stroke-width="1"/>
+          <!-- H = 60m label -->
+          <line x1="215" y1="30" x2="215" y2="210" stroke="#ffdd66" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="200" y="125" fill="#ffdd66" font-size="11" text-anchor="middle" font-family="sans-serif">H=60m</text>
+          <line x1="208" y1="30" x2="222" y2="30" stroke="#ffdd66" stroke-width="1"/>
+          <line x1="208" y1="210" x2="222" y2="210" stroke="#ffdd66" stroke-width="1"/>
+          <!-- Object A (blue, at top) -->
+          <circle cx="250" cy="40" r="10" fill="#3366ff" stroke="#aaccff" stroke-width="1.5"/>
+          <text x="250" y="44" fill="white" font-size="10" text-anchor="middle" font-weight="bold">A</text>
+          <!-- Arrow A going down -->
+          <line x1="250" y1="52" x2="250" y2="80" stroke="#6699ff" stroke-width="2" stroke-dasharray="4,2"/>
+          <polygon points="246,80 254,80 250,90" fill="#6699ff"/>
+          <!-- Object B (red, at bottom) -->
+          <circle cx="100" cy="200" r="10" fill="#cc2200" stroke="#ffaaaa" stroke-width="1.5"/>
+          <text x="100" y="204" fill="white" font-size="10" text-anchor="middle" font-weight="bold">B</text>
+          <!-- Arrow B going up -->
+          <line x1="100" y1="188" x2="100" y2="150" stroke="#ff6644" stroke-width="2" stroke-dasharray="4,2"/>
+          <polygon points="96,148 104,148 100,138" fill="#ff6644"/>
+          <!-- v0=20 label -->
+          <text x="115" y="165" fill="#ffaaaa" font-size="10" font-family="sans-serif">v₀=20 m/s↑</text>
+          <!-- Meeting point -->
+          <circle cx="175" cy="155" r="8" fill="none" stroke="#ffdd00" stroke-width="2" stroke-dasharray="3,2"/>
+          <text x="175" y="145" fill="#ffdd66" font-size="10" text-anchor="middle" font-family="sans-serif">لقاء؟</text>
+          <!-- Y axis -->
+          <line x1="55" y1="20" x2="55" y2="210" stroke="#446644" stroke-width="1" opacity="0.6"/>
+          <polygon points="51,22 59,22 55,12" fill="#446644" opacity="0.6"/>
+          <text x="62" y="18" fill="#88cc88" font-size="9" font-family="sans-serif">+y</text>
+          <!-- t=0 label -->
+          <text x="60" y="228" fill="#888899" font-size="10" font-family="sans-serif">t = 0</text>
+        </svg>
+      </div>
+
+      <p class="question-text" style="margin-top:10px">
+        <strong>المطلوب: (اتجاه الأعلى موجب ↑)</strong>
+      </p>
+
+      <!-- Sub-answers grid -->
+      <div class="multi-answer-grid">
+        <div class="answer-field">
+          <label>⏱ زمن الالتقاء (t)</label>
+          <div class="answer-row" style="flex-wrap:nowrap">
+            <input type="number" class="answer-input" id="a4-t" placeholder="؟؟" step="0.1">
+            <span class="answer-unit">s</span>
+            <button class="check-btn" onclick="checkAnswer4Sub('t',3)">✔</button>
+          </div>
+          <div class="feedback-msg" id="fb4-t" style="font-size:12px"></div>
+        </div>
+
+        <div class="answer-field">
+          <label>📍 ارتفاع مكان الالتقاء (y)</label>
+          <div class="answer-row" style="flex-wrap:nowrap">
+            <input type="number" class="answer-input" id="a4-y" placeholder="؟؟">
+            <span class="answer-unit">m</span>
+            <button class="check-btn" onclick="checkAnswer4Sub('y',15)">✔</button>
+          </div>
+          <div class="feedback-msg" id="fb4-y" style="font-size:12px"></div>
+        </div>
+
+        <div class="answer-field">
+          <label>🔵 سرعة الجسم A عند اللقاء (مع الإشارة)</label>
+          <div class="answer-row" style="flex-wrap:nowrap">
+            <input type="number" class="answer-input" id="a4-va" placeholder="؟؟" step="1">
+            <span class="answer-unit">m/s</span>
+            <button class="check-btn" onclick="checkAnswer4Sub('va',-30)">✔</button>
+          </div>
+          <div class="feedback-msg" id="fb4-va" style="font-size:12px"></div>
+        </div>
+
+        <div class="answer-field">
+          <label>🔴 سرعة الجسم B عند اللقاء (مع الإشارة)</label>
+          <div class="answer-row" style="flex-wrap:nowrap">
+            <input type="number" class="answer-input" id="a4-vb" placeholder="؟؟" step="1">
+            <span class="answer-unit">m/s</span>
+            <button class="check-btn" onclick="checkAnswer4Sub('vb',-10)">✔</button>
+          </div>
+          <div class="feedback-msg" id="fb4-vb" style="font-size:12px"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;background:rgba(255,68,68,0.06);border:1px dashed rgba(255,68,68,0.3);border-radius:8px;padding:12px">
+        <p style="color:#ff8888;font-size:13px;font-weight:700">
+          ⚠️ انتبهوا للإشارة! اتجاه الأعلى = موجب ↑ | اتجاه الأسفل = سالب ↓
+        </p>
+      </div>
+
+      <button class="hint-toggle" onclick="toggleHint('h4-main')">💡 تلميح للمسألة</button>
+      <div class="hint-box" id="h4-main">
+        اكتبوا معادلتَي الموقع:<br>
+        yA = 60 - ½×10×t² = 60 - 5t²<br>
+        yB = 20t - ½×10×t² = 20t - 5t²<br>
+        عند اللقاء: yA = yB → حلّوا لإيجاد t<br>
+        ثم: vA = 0 - 10t و vB = 20 - 10t
+      </div>
+    </div>
+
+    <!-- Q4-2: Verification -->
+    <div class="question-card" id="q4-2">
+      <div class="question-number">⚡ سؤال التحقق</div>
+      <p class="question-text">
+        هل التقى الجسمان <strong>قبل</strong> أن يصل الجسم A للأرض؟<br>
+        <em style="font-size:13px;color:var(--silver)">(احسب متى يصل A للأرض وقارنه بزمن اللقاء)</em>
+      </p>
+      <div class="answer-row" style="gap:12px">
+        <button class="check-btn" style="padding:10px 20px;font-size:14px" onclick="checkYesNo('yes')">✅ نعم</button>
+        <button class="check-btn" style="padding:10px 20px;font-size:14px;border-color:#ff8888;color:#ff8888" onclick="checkYesNo('no')">❌ لا</button>
+      </div>
+      <div class="feedback-msg" id="fb4-yesno"></div>
+      <button class="hint-toggle" onclick="toggleHint('h4-2')">💡 تلميح</button>
+      <div class="hint-box" id="h4-2">
+        زمن وصول A للأرض: t_ground = √(2×60/10) = √12 ≈ 3.46 s<br>
+        زمن اللقاء = 3 s<br>
+        3 s &lt; 3.46 s → إذاً...؟
+      </div>
+    </div>
+
+    <!-- Q4-3: Final Code Question -->
+    <div class="question-card" id="q4-3" style="border-color:rgba(255,215,0,0.3)">
+      <div class="question-number" style="background:rgba(100,60,0,0.8);border-color:var(--gold);color:var(--gold)">🏆 سؤال الكود النهائي</div>
+      <p class="question-text">
+        احسب <strong>مجموع سرعتَي الجسمين عند الالتقاء مع مراعاة الإشارة الكاملة</strong>:<br>
+        <span style="color:var(--gold)">(vA) + (vB) = ؟</span>
+      </p>
+      <div class="answer-row">
+        <span class="answer-label">المجموع:</span>
+        <input type="number" class="answer-input" id="a4-sum" placeholder="مع الإشارة" style="width:160px" step="1">
+        <span class="answer-unit">m/s</span>
+        <button class="check-btn" onclick="checkAnswer4Sum()">✔ تحقق</button>
+      </div>
+      <div class="feedback-msg" id="fb4-sum"></div>
+      <p style="font-size:12px;color:rgba(240,192,64,0.6);margin-top:8px">
+        💡 الكود = القيمة المطلقة لهذا المجموع (بدون إشارة)
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Code Entry Stage 4 -->
+  <div class="code-section" id="code-section-4" style="display:none">
+    <div class="code-hint" style="border:1px solid rgba(255,68,68,0.3)">
+      🔑 <strong>الكود النهائي = القيمة المطلقة لمجموع السرعتين</strong><br>
+      إذا وجدتم: vA = -30 m/s و vB = -10 m/s<br>
+      المجموع = (-30) + (-10) = -40<br>
+      الكود = |−40| = <strong>40</strong><br>
+      <span style="color:#ff8888;font-size:12px">⚠️ إذا حصلتم على رقم مختلف، راجعوا إشارات السرعة!</span>
+    </div>
+    <div class="code-entry magic-border" style="border-color:rgba(255,68,68,0.5)">
+      <div class="corner-deco tl"></div>
+      <div class="corner-deco tr"></div>
+      <div class="corner-deco bl"></div>
+      <div class="corner-deco br"></div>
+      <div class="lock-icon">🔒</div>
+      <p class="code-label">أدخلوا الكود النهائي لهزيمة فولديمورت!</p>
+      <div class="code-inputs">
+        <input type="number" class="code-digit" id="cd4-1" maxlength="2" min="0" max="9" placeholder="-" style="width:80px;font-size:32px">
+        <input type="number" class="code-digit" id="cd4-2" maxlength="2" min="0" max="9" placeholder="-" style="width:80px;font-size:32px">
+      </div>
+      <button class="btn-magic" style="background:linear-gradient(135deg,#5a0000,#aa0000);border-color:#ff4444;color:#ffaaaa" onclick="checkCode(4, '40')">
+        ⚡ أطلقوا التعويذة — Expelliarmus!
+      </button>
+      <div class="unlock-result" id="ur4"></div>
+    </div>
+
+    <div class="spell-unlocked" id="spell4">
+      <div class="spell-icon">⚡✨🏆</div>
+      <div class="spell-name" style="font-size:30px;color:var(--gold)">EXPELLIARMUS!</div>
+      <div class="spell-desc" style="font-size:16px">اكتملت التعويذة! فولديمورت يتراجع!</div>
+      <br>
+      <button class="btn-magic" onclick="showVictory()" style="margin-top:10px;font-size:18px;padding:16px 40px">
+        🎉 الانتصار! عودوا للقاعة الكبرى!
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <div class="team-info-bar">
+      <span class="team-house-badge" id="nav-house-4">🏰</span>
+      <span id="nav-team-4">فريقكم</span>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN VICTORY                                               -->
+<!-- ============================================================ -->
+<div id="screen-victory" class="screen">
+  <div class="victory-screen">
+    <div class="victory-animation">⚡🏆⚡</div>
+    <h1 class="title-main" style="margin:20px 0;font-size:clamp(24px,5vw,48px)">
+      EXPELLIARMUS!
+    </h1>
+    <h2 class="arabic-title" style="color:#00ff88;text-shadow:0 0 30px rgba(0,255,136,0.6)">
+      لقد أنقذتم هوجوورتس! 🎉
+    </h2>
+
+    <div class="team-badge" id="victory-team-badge" style="margin:20px auto;display:block"></div>
+
+    <div class="story-text" style="margin:20px 0;text-align:center">
+      <p>فولديمورت هُزم بقوة <strong class="story-highlight">الفيزياء والمعرفة</strong>!</p>
+      <p style="margin-top:10px">التعويذة المكتملة في حوزتكم:</p>
+    </div>
+
+    <div class="spell-collection">
+      <div class="spell-piece">⚡ Expell...</div>
+      <div class="spell-piece">⚡ ...iar...</div>
+      <div class="spell-piece">⚡ ...m...</div>
+      <div class="spell-piece">⚡ ...us! 🏆</div>
+    </div>
+
+    <div id="victory-time" style="color:var(--gold);font-size:18px;margin:20px 0;font-family:'Cinzel',serif"></div>
+
+    <div class="story-text" style="text-align:right;font-size:14px;line-height:2.2">
+      <strong style="color:var(--gold)">📐 ملخص القوانين التي استخدمتموها:</strong><br>
+      ✅ v = v₀ + g·t<br>
+      ✅ h = v₀t + ½g·t²<br>
+      ✅ v² = v₀² + 2gh<br>
+      ✅ تحليل حركة جسمين متزامنين مع مراعاة الإشارات
+    </div>
+
+    <button class="btn-magic" onclick="restartGame()" style="margin-top:24px">
+      🔁 لعبة جديدة
+    </button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  teamName: '',
+  house: '',
+  houseEmoji: '',
+  startTime: null,
+  timerInterval: null,
+  totalSeconds: 45 * 60,
+  elapsed: 0,
+  answersCorrect: {},
+  stage4: { t: false, y: false, va: false, vb: false, sum: false, yesno: false },
+  stage4AllDone: false
+};
+
+const houseEmojis = {
+  gryffindor: '🦁', slytherin: '🐍', ravenclaw: '🦅', hufflepuff: '🦡'
+};
+const houseNames = {
+  gryffindor: 'غريفيندور', slytherin: 'سلذرين', ravenclaw: 'رافنكلو', hufflepuff: 'هوفلبوف'
+};
+
+// Stage answer tracking
+const stageAnswers = { 1: {}, 2: {}, 3: {} };
+
+// ============================================================
+// BACKGROUND EFFECTS
+// ============================================================
+function createBgEffects() {
+  const bg = document.getElementById('magic-bg');
+
+  // Stars
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --dur:${2+Math.random()*4}s;
+      --op:${0.4+Math.random()*0.6};
+      animation-delay:${Math.random()*5}s;
+    `;
+    bg.appendChild(s);
+  }
+
+  // Magic particles
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'magic-particle';
+    p.style.cssText = `
+      left:${Math.random()*100}%;bottom:${Math.random()*30}%;
+      --dur:${4+Math.random()*6}s;
+      animation-delay:${Math.random()*8}s;
+      background:${['#f0c040','#cc44ff','#4488ff','#00ff88'][Math.floor(Math.random()*4)]};
+    `;
+    bg.appendChild(p);
+  }
+
+  // Lightning
+  for (let i = 0; i < 5; i++) {
+    const l = document.createElement('div');
+    l.className = 'lightning';
+    const h = 80 + Math.random() * 200;
+    l.style.cssText = `
+      left:${10+Math.random()*80}%;top:${Math.random()*20}%;
+      height:${h}px;
+      --dur:${6+Math.random()*10}s;
+      animation-delay:${Math.random()*10}s;
+    `;
+    bg.appendChild(l);
+  }
+}
+
+// ============================================================
+// SCREENS
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// HOUSE SELECTION
+// ============================================================
+function selectHouse(card) {
+  document.querySelectorAll('.house-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  state.house = card.dataset.house;
+  state.houseEmoji = houseEmojis[state.house];
+  document.getElementById('house-error').textContent = '';
+}
+
+// ============================================================
+// START GAME
+// ============================================================
+function startGame() {
+  const name = document.getElementById('teamName').value.trim();
+  if (!name) {
+    document.getElementById('teamName').style.borderColor = '#ff4444';
+    setTimeout(() => document.getElementById('teamName').style.borderColor = '', 2000);
+    return;
+  }
+  if (!state.house) {
+    document.getElementById('house-error').textContent = '⚠️ اختاروا بيتكم أولاً!';
+    return;
+  }
+  state.teamName = name;
+  updateNavBars();
+  startTimer();
+  showScreen('stage1');
+  showTimerUI();
+}
+
+function updateNavBars() {
+  for (let i = 1; i <= 4; i++) {
+    const h = document.getElementById('nav-house-' + i);
+    const t = document.getElementById('nav-team-' + i);
+    if (h) h.textContent = state.houseEmoji;
+    if (t) t.textContent = state.teamName + ' | ' + houseNames[state.house];
+  }
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function showTimerUI() {
+  document.getElementById('timer-display').style.display = 'block';
+}
+
+function startTimer() {
+  state.startTime = Date.now();
+  state.timerInterval = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const remaining = state.totalSeconds - state.elapsed;
+
+  if (remaining <= 0) {
+    clearInterval(state.timerInterval);
+    document.getElementById('timer-display').textContent = '⌛ 00:00';
+    document.getElementById('timer-fill').style.width = '0%';
+    document.getElementById('timeout-screen').classList.add('show');
+    return;
+  }
+
+  const mins = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+  const display = `⏳ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('timer-display').textContent = display;
+
+  const pct = (remaining / state.totalSeconds) * 100;
+  document.getElementById('timer-fill').style.width = pct + '%';
+
+  const timerEl = document.getElementById('timer-display');
+  if (remaining <= 300) timerEl.classList.add('urgent');
+  else timerEl.classList.remove('urgent');
+}
+
+// ============================================================
+// CHECK ANSWERS (stages 1-3)
+// ============================================================
+function checkAnswer(stage, qNum, correct, unit) {
+  const inputId = `a${stage}-${qNum}`;
+  const fbId = `fb${stage}-${qNum}`;
+  const cardId = `q${stage}-${qNum}`;
+  const input = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  const val = parseFloat(input.value);
+
+  if (isNaN(val)) {
+    fb.textContent = '⚠️ أدخلوا رقماً صحيحاً';
+    fb.className = 'feedback-msg wrong';
+    return;
+  }
+
+  if (Math.abs(val - correct) < 0.1) {
+    input.className = 'answer-input correct';
+    fb.textContent = `✅ ممتاز! الجواب الصحيح: ${correct} ${unit}`;
+    fb.className = 'feedback-msg correct';
+    document.getElementById(cardId).classList.add('answered');
+    if (!stageAnswers[stage]) stageAnswers[stage] = {};
+    stageAnswers[stage][qNum] = true;
+    checkStageComplete(stage);
+  } else {
+    input.className = 'answer-input wrong';
+    fb.textContent = `❌ ليس الجواب الصحيح، حاولوا مجدداً...`;
+    fb.className = 'feedback-msg wrong';
+    setTimeout(() => { input.className = 'answer-input'; }, 800);
+  }
+}
+
+function checkStageComplete(stage) {
+  const ans = stageAnswers[stage];
+  if (ans[1] && ans[2] && ans[3]) {
+    setTimeout(() => {
+      document.getElementById(`code-section-${stage}`).style.display = 'block';
+      document.getElementById(`code-section-${stage}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+}
+
+// ============================================================
+// CHECK ANSWERS (stage 4)
+// ============================================================
+function checkAnswer4Sub(field, correct) {
+  const input = document.getElementById(`a4-${field}`);
+  const fb = document.getElementById(`fb4-${field}`);
+  const val = parseFloat(input.value);
+
+  if (isNaN(val)) {
+    fb.textContent = '⚠️ أدخلوا رقماً';
+    fb.className = 'feedback-msg wrong';
+    return;
+  }
+
+  if (Math.abs(val - correct) < 0.2) {
+    input.className = 'answer-input correct';
+    fb.textContent = `✅ صحيح! (${correct})`;
+    fb.className = 'feedback-msg correct';
+    state.stage4[field] = true;
+    checkStage4Complete();
+  } else {
+    input.className = 'answer-input wrong';
+    if (field === 'va' || field === 'vb') {
+      fb.textContent = `❌ تأكدوا من الإشارة! (+ للأعلى, − للأسفل)`;
+    } else {
+      fb.textContent = `❌ ليس الجواب الصحيح`;
+    }
+    fb.className = 'feedback-msg wrong';
+    setTimeout(() => { input.className = 'answer-input'; }, 800);
+  }
+}
+
+function checkAnswer4Sum() {
+  const input = document.getElementById('a4-sum');
+  const fb = document.getElementById('fb4-sum');
+  const val = parseFloat(input.value);
+
+  if (isNaN(val)) {
+    fb.textContent = '⚠️ أدخلوا رقماً مع الإشارة';
+    fb.className = 'feedback-msg wrong';
+    return;
+  }
+
+  if (Math.abs(val - (-40)) < 0.5) {
+    input.className = 'answer-input correct';
+    fb.textContent = '✅ (-30) + (-10) = -40 ✔ الكود = |−40| = 40';
+    fb.className = 'feedback-msg correct';
+    state.stage4.sum = true;
+    checkStage4Complete();
+  } else if (Math.abs(val - 20) < 0.5) {
+    input.className = 'answer-input wrong';
+    fb.textContent = '❌ تحققوا من إشارة vA! الجسم A يتحرك للأسفل فسرعته سالبة.';
+    fb.className = 'feedback-msg wrong';
+    setTimeout(() => input.className = 'answer-input', 1000);
+  } else {
+    input.className = 'answer-input wrong';
+    fb.textContent = '❌ راجعوا حسابات السرعتين وإشاراتهما';
+    fb.className = 'feedback-msg wrong';
+    setTimeout(() => input.className = 'answer-input', 800);
+  }
+}
+
+function checkYesNo(answer) {
+  const fb = document.getElementById('fb4-yesno');
+  if (answer === 'yes') {
+    fb.textContent = '✅ صحيح! t_لقاء = 3s < t_وصول A للأرض ≈ 3.46s';
+    fb.className = 'feedback-msg correct';
+    state.stage4.yesno = true;
+    document.getElementById('q4-2').classList.add('answered');
+    checkStage4Complete();
+  } else {
+    fb.textContent = '❌ احسب: t_وصول A = √(2×60/10) = √12 ≈ 3.46 s، وقارنه بزمن اللقاء';
+    fb.className = 'feedback-msg wrong';
+  }
+}
+
+function checkStage4Complete() {
+  const s = state.stage4;
+  if (s.t && s.y && s.va && s.vb && s.yesno && s.sum) {
+    if (!state.stage4AllDone) {
+      state.stage4AllDone = true;
+      setTimeout(() => {
+        document.getElementById('code-section-4').style.display = 'block';
+        document.getElementById('code-section-4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 400);
+    }
+  }
+}
+
+// ============================================================
+// CHECK CODE
+// ============================================================
+function checkCode(stage, correctCode) {
+  let enteredCode = '';
+  const digits = document.querySelectorAll(`[id^="cd${stage}-"]`);
+  digits.forEach(d => { enteredCode += d.value.trim(); });
+
+  const urEl = document.getElementById(`ur${stage}`);
+
+  if (enteredCode === correctCode) {
+    digits.forEach(d => d.classList.add('correct-digit'));
+    urEl.textContent = '🔓 القفل يفتح... اكتشفتم الكود!';
+    urEl.className = 'unlock-result success';
+    setTimeout(() => {
+      document.getElementById(`spell${stage}`).classList.add('show');
+      launchSparkles();
+    }, 600);
+  } else {
+    digits.forEach(d => {
+      d.classList.add('wrong-digit');
+      setTimeout(() => d.classList.remove('wrong-digit'), 600);
+    });
+    urEl.textContent = `❌ الكود خاطئ — راجعوا إجاباتكم!`;
+    urEl.className = 'unlock-result fail';
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goToStage(n) {
+  showScreen('stage' + n);
+}
+
+// ============================================================
+// VICTORY
+// ============================================================
+function showVictory() {
+  clearInterval(state.timerInterval);
+  const totalElapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const mins = Math.floor(totalElapsed / 60);
+  const secs = totalElapsed % 60;
+
+  document.getElementById('victory-team-badge').textContent =
+    `${state.houseEmoji} ${state.teamName} | ${houseNames[state.house]}`;
+  document.getElementById('victory-time').textContent =
+    `⏱️ زمن الإنجاز: ${mins} دقيقة و ${secs} ثانية`;
+
+  showScreen('victory');
+  launchFireworks();
+}
+
+// ============================================================
+// EFFECTS
+// ============================================================
+function launchSparkles() {
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('div');
+    s.className = 'firework';
+    const angle = (i / 12) * 360;
+    const rad = angle * Math.PI / 180;
+    const dist = 80 + Math.random() * 60;
+    s.style.cssText = `
+      left:50%;top:50%;
+      --tx:${Math.cos(rad)*dist}px;
+      --ty:${Math.sin(rad)*dist}px;
+      animation-delay:${i*0.05}s;
+    `;
+    s.textContent = ['✨','⭐','💫','🌟'][i % 4];
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 2000);
+  }
+}
+
+function launchFireworks() {
+  const emojis = ['🎉','🎊','⚡','✨','🌟','💥','🏆','🦁','🐍','🦅','🦡'];
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const f = document.createElement('div');
+      f.className = 'firework';
+      f.style.cssText = `
+        left:${Math.random()*100}%;top:${50+Math.random()*40}%;
+        --tx:${(Math.random()-0.5)*300}px;
+        --ty:${-100-Math.random()*200}px;
+        font-size:${20+Math.random()*20}px;
+      `;
+      f.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      document.body.appendChild(f);
+      setTimeout(() => f.remove(), 2000);
+    }, i * 100);
+  }
+}
+
+// ============================================================
+// HINT TOGGLE
+// ============================================================
+function toggleHint(id) {
+  const box = document.getElementById(id);
+  box.classList.toggle('show');
+}
+
+// ============================================================
+// RESTART
+// ============================================================
+function restartGame() {
+  clearInterval(state.timerInterval);
+  location.reload();
+}
+
+// ============================================================
+// AUTO-ADVANCE CODE INPUTS
+// ============================================================
+function setupCodeInputs() {
+  document.querySelectorAll('.code-digit').forEach((input, idx, arr) => {
+    input.addEventListener('input', () => {
+      if (input.value.length >= 1 && idx < arr.length - 1) {
+        arr[idx + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && input.value === '' && idx > 0) {
+        arr[idx - 1].focus();
+      }
+    });
+  });
+}
+
+// Stage 4 code digits (2 digits only)
+function setupStage4Code() {
+  const d1 = document.getElementById('cd4-1');
+  const d2 = document.getElementById('cd4-2');
+  if (d1 && d2) {
+    d1.addEventListener('input', () => { if(d1.value.length >= 1) d2.focus(); });
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  createBgEffects();
+  setupCodeInputs();
+  setupStage4Code();
+});
+</script>
+</body>
+</html>
